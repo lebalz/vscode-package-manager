@@ -50,7 +50,7 @@ export function installChocolatey(logPath?: string): Promise<string | undefined>
 
     return inElevatedShell(
       `if (-Not (Test-Path -Path "$env:ProgramData\\Chocolatey")) {
-          if ("RemoteSigned", "AllSigned" -notcontains $(Get-ExecutionPolicy)) {
+          if ('RemoteSigned', 'AllSigned' -notcontains '$(Get-ExecutionPolicy)') {
             Set-ExecutionPolicy -f -ExecutionPolicy RemoteSigned
           }
           Invoke-Expression((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) | ${logTo}

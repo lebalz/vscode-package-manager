@@ -54,10 +54,20 @@ export function installChocolatey(logPath?: string): Promise<string | undefined>
             Set-ExecutionPolicy -f -ExecutionPolicy RemoteSigned
           }
           Invoke-Expression((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) | ${logTo}
+          # reload environment to make choco available
+          \`$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
         } else {
           echo "Chocolatey already installed"
         }`
     ).then((output) => {
+      return chocolateyVersion().then((version) => {
+        if (version) {
+          return version;
+        }
+        // vs code's powershell instance must be restart to make choco available
+        const ps = powershell();
+        ps.addCommand()
+      });
       return chocolateyVersion();
     }).catch((error) => {
       return undefined;

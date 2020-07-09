@@ -9,10 +9,12 @@ export function powershell() {
   });
 }
 
-export const RELOAD_ENVIRONMENT_CMD = "$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')";
+export const RELOAD_CHOCO_ENV_CMD = "$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')";
+export const RELOAD_CHOCO_ENV_IF_NEEDED = `If (-Not (Get-Command choco -errorAction SilentlyContinue )) { ${RELOAD_CHOCO_ENV_CMD} }`;
 
 export function chocolateyVersion(): Promise<string | undefined> {
   const ps = powershell();
+  ps.addCommand(RELOAD_CHOCO_ENV_IF_NEEDED);
   ps.addCommand("choco -v");
   return ps.invoke().then((out) => {
     return out;
@@ -33,12 +35,14 @@ export function isChocolateyInstalled(): Promise<boolean> {
 export function inElevatedShell(command: string): Promise<string> {
   const ps = powershell();
   const cmd = `Start-Process -FilePath "powershell" -Wait -Verb RunAs -ArgumentList "-noprofile", "-command &{${command.replace(/(\r\n|\n|\r)/gm, "").replace(/"/g, '`"')}}"`;
+  ps.addCommand(RELOAD_CHOCO_ENV_IF_NEEDED);
   ps.addCommand(cmd);
   return ps.invoke();
 }
 
 export function inShell(command: string): Promise<string> {
   const ps = powershell();
+  ps.addCommand(RELOAD_CHOCO_ENV_IF_NEEDED);
   ps.addCommand(command);
   return ps.invoke();
 }

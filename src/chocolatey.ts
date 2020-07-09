@@ -60,14 +60,6 @@ export function installChocolatey(logPath?: string): Promise<string | undefined>
           echo "Chocolatey already installed"
         }`
     ).then((output) => {
-      return chocolateyVersion().then((version) => {
-        if (version) {
-          return version;
-        }
-        // vs code's powershell instance must be restart to make choco available
-        const ps = powershell();
-        ps.addCommand()
-      });
       return chocolateyVersion();
     }).catch((error) => {
       return undefined;

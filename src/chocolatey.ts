@@ -47,6 +47,7 @@ export function installChocolatey(logPath?: string): Promise<string | undefined>
       return version;
     }
     const logTo = logPath ? `Tee-Object -FilePath ${logPath} | Write-Output` : 'Write-Output';
+    const reloadEnvironment = "`$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')";
 
     return inElevatedShell(
       `if (-Not (Test-Path -Path "$env:ProgramData\\Chocolatey")) {
@@ -54,8 +55,7 @@ export function installChocolatey(logPath?: string): Promise<string | undefined>
             Set-ExecutionPolicy -f -ExecutionPolicy RemoteSigned
           }
           Invoke-Expression((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) | ${logTo}
-          # reload environment to make choco available
-          \`$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+          ${reloadEnvironment}
         } else {
           echo "Chocolatey already installed"
         }`

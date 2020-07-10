@@ -37,7 +37,10 @@ export function shellExec(cmd: string): Thenable<TaskMessage> {
   return shellExec(cmd)
     .then(({ stdout, stderr }) => {
       if (stderr.length > 0) {
-        return ErrorMsg(stderr);
+        if (stdout.length === 0) {
+          return ErrorMsg(stderr);
+        }
+        return ErrorMsg(`${stderr}\n${stdout}`);
       }
       return SuccessMsg(stdout);
     })
@@ -52,17 +55,16 @@ export function inOsShell(cmd: string, options?: { sudo?: boolean, requiredCmd?:
       return inElevatedShell(cmd, options);
     }
     return inShell(cmd, options);
-  } else {
-    if (options?.sudo) {
-      return promptRootPassword()
-        .then((rootPw) => {
-          if (!rootPw) {
-            // throw new Error('No root password was provided');
-            return ErrorMsg('Error: No root password provided');
-          }
-          return shellExec(`echo "${rootPw}" | sudo -S echo foo > /dev/zero && ${cmd}`);
-        });
-    }
-    return shellExec(cmd);
   }
+  if (options?.sudo) {
+    return promptRootPassword()
+      .then((rootPw) => {
+        if (!rootPw) {
+          // throw new Error('No root password was provided');
+          return ErrorMsg('Error: No root password provided');
+        }
+        return shellExec(`echo "${rootPw}" | sudo -S echo foo > /dev/zero && ${cmd}`);
+      });
+  }
+  return shellExec(cmd);
 }

@@ -38,9 +38,9 @@ export function shellExec(cmd: string): Thenable<TaskMessage> {
     .then(({ stdout, stderr }) => {
       if (stderr.length > 0) {
         if (stdout.length === 0) {
-          return ErrorMsg(stderr);
+          return ErrorMsg(stderr.trim());
         }
-        return ErrorMsg(`${stderr}\n${stdout}`);
+        return ErrorMsg(`${stderr}\n${stdout}`.trim());
       }
       return SuccessMsg(stdout);
     })

@@ -33,22 +33,26 @@ export function isChocolateyInstalled(): Promise<boolean> {
   });
 }
 
-export function inElevatedShell(command: string, requiredCmd?: string): Promise<string> {
+export function inElevatedShell(command: string, options?: { requiredCmd?: string, disableChocoCheck?: boolean }): Promise<string> {
   const ps = powershell();
   const cmd = `Start-Process -FilePath "powershell" -Wait -Verb RunAs -ArgumentList "-noprofile", "-command &{${command.replace(/(\r\n|\n|\r)/gm, "").replace(/"/g, '`"')}}"`;
-  ps.addCommand(RELOAD_CHOCO_ENV_IF_NEEDED);
-  if (requiredCmd) {
-    ps.addCommand(RELOAD_PATH_IF_CMD_MISSING(requiredCmd));
+  if (options?.disableChocoCheck !== true) {
+    ps.addCommand(RELOAD_CHOCO_ENV_IF_NEEDED);
+  }
+  if (options?.requiredCmd) {
+    ps.addCommand(RELOAD_PATH_IF_CMD_MISSING(options?.requiredCmd));
   }
   ps.addCommand(cmd);
   return ps.invoke();
 }
 
-export function inShell(command: string, requiredCmd?: string): Promise<string> {
+export function inShell(command: string, options?: { requiredCmd?: string, disableChocoCheck?: boolean }): Promise<string> {
   const ps = powershell();
-  ps.addCommand(RELOAD_CHOCO_ENV_IF_NEEDED);
-  if (requiredCmd) {
-    ps.addCommand(RELOAD_PATH_IF_CMD_MISSING(requiredCmd));
+  if (options?.disableChocoCheck !== true) {
+    ps.addCommand(RELOAD_CHOCO_ENV_IF_NEEDED);
+  }
+  if (options?.requiredCmd) {
+    ps.addCommand(RELOAD_PATH_IF_CMD_MISSING(options?.requiredCmd));
   }
   ps.addCommand(command);
   return ps.invoke();

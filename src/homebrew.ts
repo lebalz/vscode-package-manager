@@ -36,7 +36,7 @@ export function installBrew(extensionPath: string, rootPW?: string): Thenable<Ta
           }
           return SuccessMsg('Homebrew installed');
         })
-        .catch((error) => ErrorMsg(`Error occured during installation of brew.\n${error}`));
+        .catch((error: Error) => ErrorMsg(`Error occured during installation of brew.\n${error}`));
     });
 }
 

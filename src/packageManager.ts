@@ -41,8 +41,8 @@ export function shellExec(cmd: string): Thenable<TaskMessage> {
       }
       return SuccessMsg(stdout);
     })
-    .catch((error) => {
-      return ErrorMsg(error);
+    .catch((error: Error) => {
+      return ErrorMsg(`${error.name}: ${error.message}`);
     });
 }
 

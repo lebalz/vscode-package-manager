@@ -33,7 +33,7 @@ export function inElevatedShell(command: string, options?: { requiredCmd?: strin
     ps.addCommand(RELOAD_PATH_IF_CMD_MISSING(options?.requiredCmd));
   }
   ps.addCommand(cmd);
-  return ps.invoke().then((res) => SuccessMsg(res)).catch((err) => ErrorMsg(err));
+  return ps.invoke().then((res) => SuccessMsg(res)).catch((err: Error) => ErrorMsg(`${err.name}: ${err.message}`));
 }
 
 export function inShell(command: string, options?: { requiredCmd?: string, disableChocoCheck?: boolean }): Thenable<TaskMessage> {
@@ -45,7 +45,7 @@ export function inShell(command: string, options?: { requiredCmd?: string, disab
     ps.addCommand(RELOAD_PATH_IF_CMD_MISSING(options?.requiredCmd));
   }
   ps.addCommand(command);
-  return ps.invoke().then((res) => SuccessMsg(res)).catch((error) => ErrorMsg(error));
+  return ps.invoke().then((res) => SuccessMsg(res)).catch((error: Error) => ErrorMsg(`${error.name}: ${error.message}`));
 }
 
 export function vscodeInstallChocolatey(

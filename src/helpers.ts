@@ -35,5 +35,5 @@ export function SuccessMsg(msg: string): TaskSuccess {
 }
 
 export function ErrorMsg(error: string): TaskError {
-  return { success: false, error: error.trim() };
+  return { success: false, error: error };
 }

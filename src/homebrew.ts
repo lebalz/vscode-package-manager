@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import { promisify } from "util";
 import { exec } from "child_process";
-import { promptRootPassword, Progress } from "./helpers";
+import { promptRootPassword, Progress, TaskMessage, SuccessMsg, ErrorMsg } from "./helpers";
 
-export function isBrewInstalled() {
+export function isBrewInstalled(): Thenable<boolean> {
   const shellExec = promisify(exec);
   return shellExec("brew -v")
     .then(({ stdout, stderr }) => {
@@ -17,66 +17,61 @@ export function isBrewInstalled() {
     });
 }
 
-export function installBrew(extensionPath: string, rootPW?: string): Promise<boolean> {
-  if (!rootPW) {
-    return isBrewInstalled();
-  }
+export function installBrew(extensionPath: string, rootPW?: string): Thenable<TaskMessage> {
   return isBrewInstalled()
     .then((isInstalled) => {
       if (isInstalled) {
-        return true;
+        return SuccessMsg('Brew installed');
+      }
+      if (!rootPW) {
+        return ErrorMsg('Brew ist not installed and not password was entered.');
       }
       const shellExec = promisify(exec);
       return shellExec(
         `cat -s ${`${extensionPath}/bin/install_brew.sh`} | bash -s "${rootPW}" && echo "Success."`
       )
         .then(({ stdout, stderr }) => {
-          if (!stdout || !stdout.endsWith("Success.\n")) {
-            return false;
+          if (stderr.length > 0 || !stdout.endsWith("Success.\n")) {
+            return ErrorMsg(`Could not install Homebrew. Try to install it manually.\n${stderr.length > 0 ? stderr : stdout}`);
           }
-          return true;
-        });
-    })
-    .catch((error) => {
-      return false;
+          return SuccessMsg('Homebrew installed');
+        })
+        .catch((error) => ErrorMsg(`Error occured during installation of brew.\n${error}`));
     });
 }
 
 export function vscodeInstallBrew(
   context: vscode.ExtensionContext,
-  progress: Progress,
+  rootProgress: Progress,
   progressOnSuccess: number
-): Thenable<boolean | undefined> {
+): Thenable<boolean> {
   return vscode.window.withProgress({
     location: vscode.ProgressLocation.Notification,
-    title: '[Git2go]: Install Homebrew',
+    title: 'Install Homebrew',
     cancellable: false
-  }, (progress, _token) => {
+  }, (_progress, _token) => {
     return isBrewInstalled()
       .then((isInstalled) => {
         if (isInstalled) {
-          progress.report({ message: 'Brew installed', increment: progressOnSuccess });
+          rootProgress.report({ message: 'Brew installed', increment: progressOnSuccess });
           return true;
         }
-        promptRootPassword()
+        return promptRootPassword()
           .then((rootPW) => {
             if (!rootPW) {
-              return { stdout: "", stderr: "ERROR: no root password" };
-            }
-            return installBrew(context.extensionPath, rootPW).then((success) => {
-              if (success) {
-                progress.report({ message: 'Brew installed', increment: progressOnSuccess });
-                return true;
-              }
-              vscode.window.showErrorMessage(
-                `Could not install install brew. Try to install it manually and try the setup process again.`
-              );
+              vscode.window.showErrorMessage('Error: no root password');
               return false;
-            });
+            }
+            return installBrew(context.extensionPath, rootPW)
+              .then((taskMsg) => {
+                if (taskMsg.success) {
+                  rootProgress.report({ message: 'Brew installed', increment: progressOnSuccess });
+                  return true;
+                }
+                vscode.window.showErrorMessage(taskMsg.error);
+                return false;
+              });
           });
-      }).catch((error) => {
-        vscode.window.showErrorMessage(error);
-        return false;
       });
   });
 }

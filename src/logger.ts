@@ -55,7 +55,7 @@ import {
     }
   
     static show() {
-      this.output?.show();
+      this.output?.show(true);
     }
   
     static hide() {

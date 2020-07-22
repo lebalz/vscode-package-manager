@@ -8,6 +8,7 @@ import {
     mtime: Date;
   }
   
+  const ALIGN_LOGGED_NEWLINES = "\r\n                          ";
   export class Logger {
     private static debugging_regex = /\package-manager\b/i;
     private static output: OutputChannel | undefined;
@@ -26,25 +27,31 @@ import {
       if (this.isDebugging) {
         console.log(message, ...optMessages);
       }
-      this.print(`${(new Date).toJSON()}: ${message} ${optMessages.join(' ')}`);
+      this.print(`${message} ${optMessages.join(' ')}`);
     }
   
     static warn(message: any, ...optMessages: any[]) {
       if (this.isDebugging) {
         console.warn(message, ...optMessages);
       }
-      this.print(`${(new Date).toJSON()}: [WARNING] ${message} ${optMessages.join(' ')}`);
+      this.print(`[WARNING] ${message} ${optMessages.join(' ')}`);
     }
   
     static error(message: any, ...optMessages: any[]) {
       if (this.isDebugging) {
         console.error(message, ...optMessages);
       }
-      this.print(`${(new Date).toJSON()}: [ERROR] ${message} ${optMessages.join(' ')}`);
+      this.print(`[ERROR] ${message} ${optMessages.join(' ')}`);
     }
-  
+
+    /**
+     * the current timestamp is prepended and newlines within the text are aligned with the first text.
+     * e.g.
+     *    "Hello         -->          "2020-07-22T09:43:16.700Z: Hello
+     *     World"                                                World"
+     */
     static print(text: string) {
-      this.output?.appendLine(text.trim());
+      this.output?.appendLine(`${(new Date).toJSON()}: ${text.trim().replace(/\r?\n/g, ALIGN_LOGGED_NEWLINES)}`);
     }
   
     static show() {

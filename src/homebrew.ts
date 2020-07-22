@@ -56,7 +56,8 @@ export function vscodeInstallBrew(
           rootProgress.report({ message: 'Brew installed', increment: progressOnSuccess });
           return true;
         }
-        return promptRootPassword("to install Brew.")
+        rootProgress.report({ message: 'Enter your root password' });
+        return promptRootPassword()
           .then((rootPW) => {
             if (!rootPW) {
               vscode.window.showErrorMessage('Error: no root password');

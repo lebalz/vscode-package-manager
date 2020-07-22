@@ -32,7 +32,10 @@ export function isPackageManagerInstalled(): Thenable<boolean> {
  */
 export function shellExec(cmd: string): Thenable<TaskMessage> {
   return OsShell.exec(cmd)
-    .then(({ stdout, stderr }) => {
+    .then(({ stdout, stderr, exitCode }) => {
+      if (exitCode === 0) {
+        return SuccessMsg(stdout, stderr);
+      }
       if (stderr.length > 0) {
         if (stdout.length === 0) {
           return ErrorMsg(stderr.trim());

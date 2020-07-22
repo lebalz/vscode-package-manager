@@ -5,6 +5,7 @@ interface OsShellResult {
   stdout: string;
   stderr: string;
   error: ExecException | null;
+  exitCode?: number | null;
 }
 
 export default class OsShell {
@@ -16,7 +17,7 @@ export default class OsShell {
     this.promise = new Promise((resolve) => {
       this.executor = exec(this.cmd, (error, stdout, stderr) => {
         Logger.log("PID [", this.executor?.pid, "] finished");
-        resolve({ stdout: stdout, stderr: stderr, error: error });
+        resolve({ stdout: stdout, stderr: stderr, error: error, exitCode: this.executor?.exitCode });
       });
       Logger.log("PID [", this.executor?.pid, "] started");
       this.executor.stdout?.on("data", (message) => {

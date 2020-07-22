@@ -30,10 +30,10 @@ export interface TaskError extends TaskMsg {
 
 export type TaskMessage = TaskError | TaskSuccess;
 
-export function SuccessMsg(msg: string): TaskSuccess {
-  return { success: true, msg: msg.trim() };
+export function SuccessMsg(msg: string, error?: string): TaskSuccess {
+  return { success: true, msg: msg.trim(), error: error };
 }
 
-export function ErrorMsg(error: string): TaskError {
-  return { success: false, error: error };
+export function ErrorMsg(error: string, msg?: string): TaskError {
+  return { success: false, error: error, msg: msg };
 }

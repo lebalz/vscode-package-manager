@@ -5,7 +5,8 @@ export type Progress = vscode.Progress<{
   increment?: number | undefined;
 }>;
 
-export function promptRootPassword(): Thenable<string | undefined> {
+export function promptRootPassword(msg?: string): Thenable<string | undefined> {
+  vscode.window.showInformationMessage(`Enter your password ${msg ?? ''}`);
   return vscode.window.showInputBox({
     password: true,
     prompt: "Root Password (used to login to your computer)",

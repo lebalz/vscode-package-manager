@@ -49,7 +49,7 @@ export function shellExec(cmd: string): Thenable<TaskMessage> {
     });
 }
 
-export function inOsShell(cmd: string, options?: { sudo?: boolean, requiredCmd?: string, disableChocoCheck?: boolean }): Thenable<TaskMessage> {
+export function inOsShell(cmd: string, options?: { sudo?: boolean, requiredCmd?: string, disableChocoCheck?: boolean, promptMsg?: string }): Thenable<TaskMessage> {
   if (process.platform === 'win32') {
     if (options?.sudo) {
       return inElevatedShell(cmd, options);
@@ -57,7 +57,7 @@ export function inOsShell(cmd: string, options?: { sudo?: boolean, requiredCmd?:
     return inShell(cmd, options);
   }
   if (options?.sudo) {
-    return promptRootPassword()
+    return promptRootPassword(options.promptMsg)
       .then((rootPw) => {
         if (!rootPw) {
           // throw new Error('No root password was provided');

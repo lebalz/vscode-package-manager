@@ -2,9 +2,7 @@ import { vscodeInstallChocolatey, isChocolateyInstalled, inElevatedShell, inShel
 import { Progress, ErrorMsg, SuccessMsg, TaskMessage, promptRootPassword } from "./helpers";
 import { vscodeInstallBrew, isBrewInstalled } from "./homebrew";
 import { ExtensionContext } from "vscode";
-
-import { promisify } from "util";
-import { exec } from "child_process";
+import OsShell from "./osShell";
 
 export function vscodeInstallPackageManager(context: ExtensionContext, progress: Progress, progressOnSuccess: number): Thenable<boolean> {
   if (process.platform === 'win32') {
@@ -33,8 +31,7 @@ export function isPackageManagerInstalled(): Thenable<boolean> {
  * @return Promise<TaskMessage>
  */
 export function shellExec(cmd: string): Thenable<TaskMessage> {
-  const shellExec = promisify(exec);
-  return shellExec(cmd)
+  return OsShell.exec(cmd)
     .then(({ stdout, stderr }) => {
       if (stderr.length > 0) {
         if (stdout.length === 0) {

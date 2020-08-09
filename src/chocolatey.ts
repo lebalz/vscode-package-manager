@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as Shell from 'node-powershell';
 import { execSync } from 'child_process';
 import { Progress, SuccessMsg, ErrorMsg, TaskMessage } from './helpers';
+import { Logger } from "./logger";
 
 export function powershell() {
   return new Shell({
@@ -32,6 +33,12 @@ export function inElevatedShell(command: string, options?: { requiredCmd?: strin
   if (options?.requiredCmd) {
     ps.addCommand(RELOAD_PATH_IF_CMD_MISSING(options?.requiredCmd));
   }
+  ps.on('output', (out) => {
+    Logger.log(out);
+  });
+  ps.on('err', (error) => {
+    Logger.warn(error);
+  });
   ps.addCommand(cmd);
   return ps.invoke().then((res) => SuccessMsg(res)).catch((err: Error) => ErrorMsg(`${err.name}: ${err.message}`));
 }
@@ -44,6 +51,12 @@ export function inShell(command: string, options?: { requiredCmd?: string, disab
   if (options?.requiredCmd) {
     ps.addCommand(RELOAD_PATH_IF_CMD_MISSING(options?.requiredCmd));
   }
+  ps.on('output', (out) => {
+    Logger.log(out);
+  });
+  ps.on('err', (error) => {
+    Logger.warn(error);
+  });
   ps.addCommand(command);
   return ps.invoke().then((res) => SuccessMsg(res)).catch((error: Error) => ErrorMsg(`${error.name}: ${error.message}`));
 }
